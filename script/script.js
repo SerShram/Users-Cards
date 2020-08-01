@@ -6,7 +6,7 @@ function creatCard (src, user, gender, phone, email, location, age, regEd) {
 	let newCard = template.cloneNode(true);
 	cardsContaner.append(newCard);
 	document.querySelector('.js-image').setAttribute('src', src)
-	document.querySelector('.js-name').innerHTML = `${user} (${gender})` ;
+	document.querySelector('.js-name b').innerHTML = `${user}<br>( ${gender} )` ;
 	document.querySelector('.js-phone').innerHTML = `phone: ${phone}`;
 	document.querySelector('.js-email').innerHTML = email;
 	document.querySelector('.js-location').innerHTML = location;
