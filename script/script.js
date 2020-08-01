@@ -36,6 +36,7 @@ function countryPeople (country) {
 }
 
 function myFetch () {
+	document.querySelector('.btn').innerHTML = 'loaded';
 	document.querySelector('.flex-container').innerHTML = '';
 	let random = Math.ceil(Math.random() * 100);
 
@@ -44,7 +45,8 @@ function myFetch () {
         return data.json();
     })
     .then(data => {
-    	
+    	//console.log(data);
+    	document.querySelector('.btn').innerHTML = 'push me';
     	document.querySelector('.wrapper').classList.add('wrap-active')
     	document.querySelector('.title').innerHTML = 'Users';
     	let datRes = data.results;
