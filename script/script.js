@@ -1,6 +1,6 @@
 
-//Клонирует шаблон и наполняет
-function creatCard (src, user, gender, phone, email, location, age, registered) {
+//-------Клонирует шаблон и наполняет-----------------------------------------------
+function creatCard (src, user, gender, phone, email, location, age, regEd) {
 	let template = document.querySelector('.card');
 	let cardsContaner = document.querySelector('.flex-container');
 	let newCard = template.cloneNode(true);
@@ -10,16 +10,20 @@ function creatCard (src, user, gender, phone, email, location, age, registered) 
 	document.querySelector('.js-phone').innerHTML = `phone: ${phone}`;
 	document.querySelector('.js-email').innerHTML = email;
 	document.querySelector('.js-location').innerHTML = location;
+	//--------------Форматирование даты--------------------------------------------
+	age = new Date(age);
+	age = `${age.toDateString()}`;
 	document.querySelector('.js-age').innerHTML = age;
-	document.querySelector('.js-registery').innerHTML = registered;
+
+	regEd = new Date(regEd);
+	regEd = `${regEd.toDateString()} ${regEd.toLocaleTimeString()}`;
+	document.querySelector('.js-registery').innerHTML = `${regEd}`;
 }
 
 function statistics (results, male, female, out) {
 	let div = document.querySelector('.statistics');
 	div.classList.add('stat-active');
-	div.innerHTML = `Количество пользователей = ${results}<br>
-	Мужчин = ${male}<br>
-	Женщин = ${female}<br>${out}<br>`;
+	div.innerHTML = `Количество пользователей= ${results}<br>Мужчин= ${male}<br>Женщин= ${female}<br>${out}<br>`;
 }
 
 //-------Количество человек по странам--------
@@ -31,14 +35,8 @@ function countryPeople (country) {
 	document.querySelector('.statistics').innerHTML += `Количество пользователей по странам :<br>${out}`;
 }
 
-//-----Очищает flex-container от карточек
-function clearCard () {
-	let blockCards = document.querySelector('.flex-container');
-	blockCards.innerHTML = [];
-}
-
 function myFetch () {
-	clearCard ();
+	document.querySelector('.flex-container').innerHTML = '';
 	let random = Math.ceil(Math.random() * 100);
 
 	fetch(`https://randomuser.me/api/?results=${random}`)
@@ -46,31 +44,34 @@ function myFetch () {
         return data.json();
     })
     .then(data => {
-    	//console.log(data);
+    	
+    	document.querySelector('.wrapper').classList.add('wrap-active')
+    	document.querySelector('.title').innerHTML = 'Users';
+    	let datRes = data.results;
          //-------Статистика-----------
        let results = data.info.results;
        let male = 0;
        let female = 0;
        let country = {};
-        
-        for (let i = 0; i < data.results.length; i++) {
-        		let picture = data.results[i].picture.large;
+       
+        for (let i = 0; i < datRes.length; i++) {
+        		let picture = datRes[i].picture.large;
         		let userName = '';
-        		let gender = data.results[i].gender;
-        		let phone = data.results[i].phone;
-        		let email = data.results[i].email;
-        		let location = `${data.results[i].location.country} ${data.results[i].location.city}<br>
-        							${data.results[i].location.street.name} ${data.results[i].location.street.number}`;
-        		let age = data.results[i].dob.date;
-        		let registered = data.results[i].registered.date;
+        		let gender = datRes[i].gender;
+        		let phone = datRes[i].phone;
+        		let email = datRes[i].email;
+        		let location = `${datRes[i].location.country} ${datRes[i].location.city}<br>
+        							${datRes[i].location.street.name} ${datRes[i].location.street.number}`;
+        		let age = datRes[i].dob.date;
+        		let regEd = datRes[i].registered.date;
 
-        		for (let key in data.results[i].name) {
-        			userName += data.results[i].name[key] + ' ';
+        		for (let key in datRes[i].name) {
+        			userName += datRes[i].name[key] + ' ';
 				}
-				creatCard (picture, userName, gender, phone, email, location, age,registered);
+				creatCard (picture, userName, gender, phone, email, location, age, regEd);
 
-				if (data.results[i].gender == 'male') male++;
-				if (data.results[i].gender == 'female') female++;
+				if (datRes[i].gender == 'male') male++;
+				if (datRes[i].gender == 'female') female++;
 				let out = '';
 				if (male > female) {
 					out = 'Мужчин больше .';
@@ -80,12 +81,11 @@ function myFetch () {
 					out = 'Мужчин и Женщин равное количество';
 				}
 
-				if (typeof country[data.results[i].nat] == 'undefined') {
-					country[data.results[i].nat] = 1;
+				if (typeof country[datRes[i].nat] == 'undefined') {
+					country[datRes[i].nat] = 1;
 				} else {
-					country[data.results[i].nat]++;
+					country[datRes[i].nat]++;
 				}
-
 				statistics(results, male, female, out);
         }
         countryPeople(country);
