@@ -36,7 +36,7 @@ function countryPeople (country) {
 }
 
 function myFetch () {
-	document.querySelector('.btn').innerHTML = 'loaded';
+	document.querySelector('.btn').innerHTML = 'loading';
 	document.querySelector('.flex-container').innerHTML = '';
 	let random = Math.ceil(Math.random() * 100);
 
