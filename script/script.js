@@ -1,43 +1,54 @@
 
-//-------Клонирует шаблон и наполняет-----------------------------------------------
-function creatCard (src, user, gender, phone, email, location, age, regEd) {
-	let template = document.querySelector('.card');
-	let cardsContaner = document.querySelector('.flex-container');
-	let newCard = template.cloneNode(true);
-	cardsContaner.append(newCard);
-	document.querySelector('.js-image').setAttribute('src', src)
-	document.querySelector('.js-name b').innerHTML = `${user}<br>( ${gender} )` ;
-	document.querySelector('.js-phone').innerHTML = `phone: ${phone}`;
-	document.querySelector('.js-email').innerHTML = email;
-	document.querySelector('.js-location').innerHTML = location;
-	//--------------Форматирование даты--------------------------------------------
+
+//-------Шаблон карточек-----------------------------------------------
+function template (src, user, gender, phone, email, location, age, regEd) {
 	age = new Date(age);
 	age = `${age.toDateString()}`;
-	document.querySelector('.js-age').innerHTML = age;
 
 	regEd = new Date(regEd);
 	regEd = `${regEd.toDateString()} ${regEd.toLocaleTimeString()}`;
-	document.querySelector('.js-registery').innerHTML = `${regEd}`;
-}
 
-function statistics (results, male, female, out) {
-	let div = document.querySelector('.statistics');
-	div.classList.add('stat-active');
-	div.innerHTML = `Количество пользователей= ${results}<br>Мужчин= ${male}<br>Женщин= ${female}<br>${out}<br>`;
+	let card = `
+	<div class="card">
+		<img src="${src}" alt="" class="card__image js-image">
+		<ul class="card__description">
+			<li class="js-name"><b>${user}<br>( ${gender} )</b></li>
+			<li class="js-phone">phone: ${phone}</li>
+			<li class="js-email"><a href="mailto:${email}">${email}</a></li>
+			<li class="js-location">${location}</li>
+			<li class="js-age">${age}</li>
+			<li class="js-registery">${regEd}</li>
+		</ul>
+	</div>`;
+	return card;
 }
+//---------Статистика-----------------------------------------------------
+function statistics (results, male, female, country) {
+	let whoIsMore = '';
 
-//-------Количество человек по странам--------
-function countryPeople (country) {
+	if (male > female) {
+		whoIsMore = 'Мужчин больше .';
+	} else if (male < female) {
+		whoIsMore = 'Женщин больше .';
+	} else {
+		whoIsMore = 'Мужчин и Женщин равное количество';
+	}
+
 	let out = '';
 	for (let key in country) {
 		out += `${key} - ${country[key]} чел. `;
 	}
-	document.querySelector('.statistics').innerHTML += `Количество пользователей по странам :<br>${out}`;
+	let stat = `
+	<p>Количество пользователей= ${results}</p>
+	<p>Мужчин= ${male}</p>
+	<p>Женщин= ${female}</p>
+	<p>${whoIsMore}</p>
+	<p>Количество пользователей по странам :<br>${out}</p>`;
+	return stat;
 }
 
 function myFetch () {
 	document.querySelector('.btn').innerHTML = 'loading';
-	document.querySelector('.flex-container').innerHTML = '';
 	let random = Math.ceil(Math.random() * 100);
 
 	fetch(`https://randomuser.me/api/?results=${random}`)
@@ -47,51 +58,45 @@ function myFetch () {
     .then(data => {
     	//console.log(data);
     	document.querySelector('.btn').innerHTML = 'push me';
-    	document.querySelector('.wrapper').classList.add('wrap-active')
+    	document.querySelector('.wrapper').classList.add('js-wrap-active')
     	document.querySelector('.title').innerHTML = 'Users';
     	let datRes = data.results;
-         //-------Статистика-----------
-       let results = data.info.results;
-       let male = 0;
-       let female = 0;
-       let country = {};
+    	let cards = '';
+      let results = data.info.results;
+      let male = 0;
+      let female = 0;
+      let country = {};
        
-        for (let i = 0; i < datRes.length; i++) {
-        		let picture = datRes[i].picture.large;
-        		let userName = '';
-        		let gender = datRes[i].gender;
-        		let phone = datRes[i].phone;
-        		let email = datRes[i].email;
-        		let location = `${datRes[i].location.country} ${datRes[i].location.city}<br>
-        							${datRes[i].location.street.name} ${datRes[i].location.street.number}`;
-        		let age = datRes[i].dob.date;
-        		let regEd = datRes[i].registered.date;
+		for (let i = 0; i < datRes.length; i++) {
+				let picture = datRes[i].picture.large;
 
-        		for (let key in datRes[i].name) {
-        			userName += datRes[i].name[key] + ' ';
-				}
-				creatCard (picture, userName, gender, phone, email, location, age, regEd);
+				let userName = '';
+				for (let key in datRes[i].name) {
+					userName += datRes[i].name[key] + ' ';
+			}
+				let gender = datRes[i].gender;
+				let phone = datRes[i].phone;
+				let email = datRes[i].email;
+				let location = `${datRes[i].location.country} ${datRes[i].location.city}<br>
+									${datRes[i].location.street.name} ${datRes[i].location.street.number}`;
+				let age = datRes[i].dob.date;
+				let regEd = datRes[i].registered.date;
 
-				if (datRes[i].gender == 'male') male++;
-				if (datRes[i].gender == 'female') female++;
-				let out = '';
-				if (male > female) {
-					out = 'Мужчин больше .';
-				} else if (male < female) {
-					out = 'Женщин больше .';
-				} else {
-					out = 'Мужчин и Женщин равное количество';
-				}
+			cards += template (picture, userName, gender, phone, email, location, age, regEd);
 
-				if (typeof country[datRes[i].nat] == 'undefined') {
-					country[datRes[i].nat] = 1;
-				} else {
-					country[datRes[i].nat]++;
-				}
-				statistics(results, male, female, out);
-        }
-        countryPeople(country);
+			if (datRes[i].gender == 'male') male++;
+			if (datRes[i].gender == 'female') female++;
+
+			if (typeof country[datRes[i].nat] == 'undefined') {
+				country[datRes[i].nat] = 1;
+			} else {
+				country[datRes[i].nat]++;
+			}
+		}
+		document.querySelector('.flex-container').innerHTML = cards;
+		let div = document.querySelector('.statistics');
+		div.classList.add('js-stat-active');
+		div.innerHTML = statistics(results, male, female, country);
     })
 }
-
-document.querySelector('.btn').onclick = myFetch;
+document.querySelector('.btn').addEventListener('click', myFetch);
